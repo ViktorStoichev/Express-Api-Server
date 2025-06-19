@@ -1,5 +1,6 @@
 import axios from 'axios';
 import multer from 'multer';
+import sharp from 'sharp';
 
 const upload = multer();
 
@@ -13,12 +14,25 @@ export const uploadImage = [
                 return res.status(400).json({ message: 'No image file provided' });
             }
 
-            const imageBase64 = file.buffer.toString('base64');
+            // 🔧 Смалява изображението до ширина 1024px, компресира в JPEG с 80% качество
+            const resizedBuffer = await sharp(file.buffer)
+                .resize({ width: 1024, withoutEnlargement: true }) // няма да увеличава ако е по-малко
+                .jpeg({ quality: 80 }) // компресира с 80% качество
+                .toBuffer();
+
+            const imageBase64 = resizedBuffer.toString('base64');
+
+            const params = new URLSearchParams();
+            params.append('key', process.env.IMGBB_API_KEY);
+            params.append('image', imageBase64);
 
             const response = await axios.post(
-                `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
+                'https://api.imgbb.com/1/upload',
+                params.toString(),
                 {
-                    image: imageBase64,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
                 }
             );
 
@@ -28,7 +42,7 @@ export const uploadImage = [
             });
 
         } catch (error) {
-            console.error('Upload failed:', error.message);
+            console.error('Upload failed:', error.response?.data || error.message);
             res.status(500).json({ message: 'Image upload failed' });
         }
     }
