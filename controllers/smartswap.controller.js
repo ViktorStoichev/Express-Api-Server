@@ -50,7 +50,7 @@ export const uploadImage = [
 
 export const deleteImage = async (req, res) => {
     try {
-        const { deleteUrl } = req.body;
+        const deleteUrl = req.query.deleteUrl;
 
         if (!deleteUrl) {
             return res.status(400).json({ message: 'Delete URL is required' });
