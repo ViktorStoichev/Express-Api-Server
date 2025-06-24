@@ -20,7 +20,7 @@ export const uploadImage = [
                 .toBuffer();
 
             // Upload to Cloudinary using stream
-            const stream = cloudinary.v2.uploader.upload_stream(
+            const stream = cloudinary.uploader.upload_stream(
                 { resource_type: 'image' },
                 (error, result) => {
                     if (error) {
@@ -49,7 +49,7 @@ export const deleteImage = async (req, res) => {
             return res.status(400).json({ message: 'public_id is required' });
         }
 
-        const result = await cloudinary.v2.uploader.destroy(publicId);
+        const result = await cloudinary.uploader.destroy(publicId);
         if (result.result === 'ok') {
             res.status(200).json({ message: 'Image deleted successfully' });
         } else {
