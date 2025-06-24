@@ -1,6 +1,6 @@
-import axios from 'axios';
 import multer from 'multer';
 import sharp from 'sharp';
+import cloudinary from '../utils/cloudinary.js';
 
 const upload = multer();
 
@@ -14,35 +14,28 @@ export const uploadImage = [
                 return res.status(400).json({ message: 'No image file provided' });
             }
 
-            // 🔧 Смалява изображението до ширина 1024px, компресира в JPEG с 80% качество
             const resizedBuffer = await sharp(file.buffer)
-                .resize({ width: 1024, withoutEnlargement: true }) // няма да увеличава ако е по-малко
-                .jpeg({ quality: 80 }) // компресира с 80% качество
+                .resize({ width: 1024, withoutEnlargement: true })
+                .jpeg({ quality: 80 })
                 .toBuffer();
 
-            const imageBase64 = resizedBuffer.toString('base64');
-
-            const params = new URLSearchParams();
-            params.append('key', process.env.IMGBB_API_KEY);
-            params.append('image', imageBase64);
-
-            const response = await axios.post(
-                'https://api.imgbb.com/1/upload',
-                params.toString(),
-                {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
+            // Upload to Cloudinary using stream
+            const stream = cloudinary.v2.uploader.upload_stream(
+                { resource_type: 'image' },
+                (error, result) => {
+                    if (error) {
+                        console.error('Cloudinary upload failed:', error);
+                        return res.status(500).json({ message: 'Image upload failed' });
+                    }
+                    res.status(200).json({
+                        url: result.secure_url,
+                        public_id: result.public_id,
+                    });
                 }
             );
-
-            res.status(200).json({
-                url: response.data.data.url,
-                deleteUrl: response.data.data.delete_url,
-            });
-
+            stream.end(resizedBuffer);
         } catch (error) {
-            console.error('Upload failed:', error.response?.data || error.message);
+            console.error('Upload failed:', error.message);
             res.status(500).json({ message: 'Image upload failed' });
         }
     }
@@ -50,14 +43,18 @@ export const uploadImage = [
 
 export const deleteImage = async (req, res) => {
     try {
-        const deleteUrl = req.query.deleteUrl;
+        const publicId = req.query.public_id;
 
-        if (!deleteUrl) {
-            return res.status(400).json({ message: 'Delete URL is required' });
+        if (!publicId) {
+            return res.status(400).json({ message: 'public_id is required' });
         }
 
-        const response = await axios.get(deleteUrl);
-        res.status(200).json({ message: 'Image deleted successfully', data: response.data });
+        const result = await cloudinary.v2.uploader.destroy(publicId);
+        if (result.result === 'ok') {
+            res.status(200).json({ message: 'Image deleted successfully' });
+        } else {
+            res.status(400).json({ message: 'Image deletion failed', data: result });
+        }
     } catch (error) {
         console.error('Delete failed:', error.message);
         res.status(500).json({ message: 'Image deletion failed' });
