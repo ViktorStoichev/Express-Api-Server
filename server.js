@@ -1,7 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-
+import dotenv from 'dotenv';
 import smartswapRoutes from './routes/smartswap.routes.js';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
