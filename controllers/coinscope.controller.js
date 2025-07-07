@@ -1,39 +1,80 @@
-export const getAllCoins = async (req, res) => {
-    try {
-        const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false';
-        const response = await fetch(url);
-        const data = await response.json();
-        res.set('Access-Control-Allow-Origin', '*');
-        res.json(data);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch data from CoinGecko' });
-    }
+import fetch from 'node-fetch';
+
+export async function fetchAllCoins(req, res) {
+  try {
+    const response = await fetch('https://api.coincap.io/v2/assets');
+    const data = await response.json();
+    res.set('Access-Control-Allow-Origin', '*');
+    res.json(data.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch data from CoinCap' });
+  }
 }
 
-export const getOneCoin = async (req, res) => {
-    try {
-        const { id } = req.params;
-        console.log(id)
-        const url = `https://api.coingecko.com/api/v3/coins/${id}`;
-        const response = await fetch(url);
-        const data = await response.json();
-        res.set('Access-Control-Allow-Origin', '*');
-        res.json(data);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch coin details from CoinGecko' });
-    }
-}
-
-export const getPricesHistory = async (req, res) => {
+export async function fetchCoinById(req, res) {
+  try {
     const { id } = req.params;
-    const { vs_currency, days, interval } = req.query;
-    const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=${vs_currency}&days=${days}&interval=${interval}`;
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        res.set('Access-Control-Allow-Origin', '*');
-        res.json(data);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch market chart data' });
-    }
+    const response = await fetch(`https://api.coincap.io/v2/assets/${id}`);
+    const data = await response.json();
+    res.set('Access-Control-Allow-Origin', '*');
+    res.json(data.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch coin details from CoinCap' });
+  }
+}
+
+export async function fetchHourlyHistory(req, res) {
+  try {
+    const { id } = req.params;
+    const now = Date.now();
+    const oneDayAgo = now - 24 * 60 * 60 * 1000;
+    const response = await fetch(`https://api.coincap.io/v2/assets/${id}/history?interval=h1&start=${oneDayAgo}&end=${now}`);
+    const data = await response.json();
+    res.set('Access-Control-Allow-Origin', '*');
+    res.json(data.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch hourly history from CoinCap' });
+  }
+}
+
+export async function fetch7dHistory(req, res) {
+  try {
+    const { id } = req.params;
+    const now = Date.now();
+    const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+    const response = await fetch(`https://api.coincap.io/v2/assets/${id}/history?interval=d1&start=${sevenDaysAgo}&end=${now}`);
+    const data = await response.json();
+    res.set('Access-Control-Allow-Origin', '*');
+    res.json(data.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch 7d history from CoinCap' });
+  }
+}
+
+export async function fetch30dHistory(req, res) {
+  try {
+    const { id } = req.params;
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+    const response = await fetch(`https://api.coincap.io/v2/assets/${id}/history?interval=d1&start=${thirtyDaysAgo}&end=${now}`);
+    const data = await response.json();
+    res.set('Access-Control-Allow-Origin', '*');
+    res.json(data.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch 30d history from CoinCap' });
+  }
+}
+
+export async function fetch1yHistory(req, res) {
+  try {
+    const { id } = req.params;
+    const now = Date.now();
+    const oneYearAgo = now - 365 * 24 * 60 * 60 * 1000;
+    const response = await fetch(`https://api.coincap.io/v2/assets/${id}/history?interval=d1&start=${oneYearAgo}&end=${now}`);
+    const data = await response.json();
+    res.set('Access-Control-Allow-Origin', '*');
+    res.json(data.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch 1y history from CoinCap' });
+  }
 }
