@@ -13,6 +13,7 @@ export const getAllCoins = async (req, res) => {
 export const getOneCoin = async (req, res) => {
     try {
         const { id } = req.params;
+        console.log(id)
         const url = `https://api.coingecko.com/api/v3/coins/${id}`;
         const response = await fetch(url);
         const data = await response.json();
