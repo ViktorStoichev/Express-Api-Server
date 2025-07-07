@@ -1,6 +1,17 @@
+const BASE_URL = 'https://rest.coincap.io/v3';
+const API_KEY = process.env.COINCAP_API_KEY;
+
+function withApiKey(url) {
+  if (API_KEY) {
+    return url + (url.includes('?') ? '&' : '?') + `apiKey=${API_KEY}`;
+  }
+  return url;
+}
+
 export async function fetchAllCoins(req, res) {
   try {
-    const response = await fetch('https://api.coincap.io/v2/assets');
+    const url = withApiKey(`${BASE_URL}/assets`);
+    const response = await fetch(url);
     const data = await response.json();
     res.set('Access-Control-Allow-Origin', '*');
     res.json(data.data);
@@ -12,7 +23,8 @@ export async function fetchAllCoins(req, res) {
 export async function fetchCoinById(req, res) {
   try {
     const { id } = req.params;
-    const response = await fetch(`https://api.coincap.io/v2/assets/${id}`);
+    const url = withApiKey(`${BASE_URL}/assets/${id}`);
+    const response = await fetch(url);
     const data = await response.json();
     res.set('Access-Control-Allow-Origin', '*');
     res.json(data.data);
@@ -26,7 +38,8 @@ export async function fetchHourlyHistory(req, res) {
     const { id } = req.params;
     const now = Date.now();
     const oneDayAgo = now - 24 * 60 * 60 * 1000;
-    const response = await fetch(`https://api.coincap.io/v2/assets/${id}/history?interval=h1&start=${oneDayAgo}&end=${now}`);
+    const url = withApiKey(`${BASE_URL}/assets/${id}/history?interval=h1&start=${oneDayAgo}&end=${now}`);
+    const response = await fetch(url);
     const data = await response.json();
     res.set('Access-Control-Allow-Origin', '*');
     res.json(data.data);
@@ -40,7 +53,8 @@ export async function fetch7dHistory(req, res) {
     const { id } = req.params;
     const now = Date.now();
     const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
-    const response = await fetch(`https://api.coincap.io/v2/assets/${id}/history?interval=d1&start=${sevenDaysAgo}&end=${now}`);
+    const url = withApiKey(`${BASE_URL}/assets/${id}/history?interval=d1&start=${sevenDaysAgo}&end=${now}`);
+    const response = await fetch(url);
     const data = await response.json();
     res.set('Access-Control-Allow-Origin', '*');
     res.json(data.data);
@@ -54,7 +68,8 @@ export async function fetch30dHistory(req, res) {
     const { id } = req.params;
     const now = Date.now();
     const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-    const response = await fetch(`https://api.coincap.io/v2/assets/${id}/history?interval=d1&start=${thirtyDaysAgo}&end=${now}`);
+    const url = withApiKey(`${BASE_URL}/assets/${id}/history?interval=d1&start=${thirtyDaysAgo}&end=${now}`);
+    const response = await fetch(url);
     const data = await response.json();
     res.set('Access-Control-Allow-Origin', '*');
     res.json(data.data);
@@ -68,7 +83,8 @@ export async function fetch1yHistory(req, res) {
     const { id } = req.params;
     const now = Date.now();
     const oneYearAgo = now - 365 * 24 * 60 * 60 * 1000;
-    const response = await fetch(`https://api.coincap.io/v2/assets/${id}/history?interval=d1&start=${oneYearAgo}&end=${now}`);
+    const url = withApiKey(`${BASE_URL}/assets/${id}/history?interval=d1&start=${oneYearAgo}&end=${now}`);
+    const response = await fetch(url);
     const data = await response.json();
     res.set('Access-Control-Allow-Origin', '*');
     res.json(data.data);
