@@ -23,3 +23,17 @@ export const getOneCoin = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch coin details from CoinGecko' });
     }
 }
+
+export const getHistoryFor7Days = async (req, res) => {
+    const { id } = req.params;
+    const { vs_currency, days } = req.query;
+    const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=${vs_currency}&days=${days}`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        res.set('Access-Control-Allow-Origin', '*');
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch market chart data' });
+    }
+}
