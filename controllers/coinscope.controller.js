@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 export async function fetchAllCoins(req, res) {
   try {
     const response = await fetch('https://api.coincap.io/v2/assets');
