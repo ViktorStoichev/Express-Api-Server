@@ -24,10 +24,10 @@ export const getOneCoin = async (req, res) => {
     }
 }
 
-export const getHistoryFor7Days = async (req, res) => {
+export const getPricesHistory = async (req, res) => {
     const { id } = req.params;
-    const { vs_currency, days } = req.query;
-    const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=${vs_currency}&days=${days}`;
+    const { vs_currency, days, interval } = req.query;
+    const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=${vs_currency}&days=${days}&interval=${interval}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
